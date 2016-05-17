@@ -8,11 +8,10 @@ import javax.xml.stream.XMLStreamException;
 
 import org.sbml.jsbml.Model;
 import org.sbml.jsbml.SBMLDocument;
-import org.sbml.jsbml.ext.SBasePlugin;
-import org.sbml.jsbml.ext.layout.LayoutModelPlugin;
 import org.sbml.jsbml.ext.layout.LayoutConstants;
-import org.sbml.jsbml.ext.qual.QualConstant;
-import org.sbml.jsbml.ext.qual.QualitativeModel;
+import org.sbml.jsbml.ext.layout.LayoutModelPlugin;
+import org.sbml.jsbml.ext.qual.QualConstants;
+import org.sbml.jsbml.ext.qual.QualModelPlugin;
 import org.sbml.jsbml.xml.stax.SBMLReader;
 
 /**
@@ -21,6 +20,7 @@ import org.sbml.jsbml.xml.stax.SBMLReader;
  * its enclosed model and the qualitative part of the model.
  * 
  * @author Aurelien Naldi
+ * @ Some changes by Orlando Rocha
  */
 public class SBMLqualHelper {
 
@@ -48,19 +48,19 @@ public class SBMLqualHelper {
 	public static SBMLQualBundle newBundle(boolean addLayout) {
 		// init SBML document
 		SBMLDocument sdoc = new SBMLDocument(3,1);
-		sdoc.addNamespace(QualConstant.shortLabel, "xmlns", QualConstant.namespaceURI);
+		
+		sdoc.enablePackage(QualConstants.namespaceURI);
+		
 		if (addLayout) {
-			sdoc.addNamespace(LayoutConstants.shortLabel, "xmlns", LayoutConstants.namespaceURI);
+			sdoc.addDeclaredNamespace(LayoutConstants.shortLabel, LayoutConstants.namespaceURI);
 		}
 
 		// create the main SBML model
 		Model smodel = sdoc.createModel("model_id");
 		
 		// add qual and layout extensions
-		QualitativeModel qmodel = new QualitativeModel(smodel);
-		smodel.addExtension(QualConstant.namespaceURI, qmodel);
-		// Add the "required" attributes for the extensions (should be automated later)
-		sdoc.getSBMLDocumentAttributes().put(QualConstant.shortLabel + ":required", "true");
+		QualModelPlugin qmodel = new QualModelPlugin(smodel);
+		smodel.addExtension(QualConstants.namespaceURI, qmodel);
 
 		LayoutModelPlugin lmodel = null;
 		if (addLayout) {
@@ -76,18 +76,10 @@ public class SBMLqualHelper {
 	private static SBMLQualBundle getQualitativeModel(SBMLDocument sdoc) {
 		Model smodel = sdoc.getModel();
 		
-		// Warning: how will we deal with multiple namespace versions?
-		QualitativeModel qmodel = null;
-		SBasePlugin plugin = smodel.getExtension(QualConstant.namespaceURI);
-		if (plugin instanceof QualitativeModel) {
-			qmodel = (QualitativeModel)plugin;
-		}
+		QualModelPlugin qmodel = (QualModelPlugin) smodel.getExtension(QualConstants.shortLabel);
 
-		LayoutModelPlugin lmodel = null;
-		plugin = smodel.getExtension(LayoutConstants.namespaceURI);
-		if (plugin instanceof LayoutModelPlugin) {
-			lmodel = (LayoutModelPlugin)plugin;
-		}
+		String layoutnamespaceuri=LayoutConstants.getNamespaceURI(smodel.getLevel(), smodel.getVersion());
+		LayoutModelPlugin lmodel = (LayoutModelPlugin) smodel.getExtension(layoutnamespaceuri);
 
 		return new SBMLQualBundle(sdoc, smodel, qmodel, lmodel);
 	}
