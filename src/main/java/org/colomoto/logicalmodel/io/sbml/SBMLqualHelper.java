@@ -28,6 +28,13 @@ public class SBMLqualHelper {
 		return getQualitativeModel( parseFile(f));
 	}
 	
+	public static SBMLQualBundle loadSBMLDocument(SBMLDocument doc) throws IOException{
+		if(doc.getVersion()>0 && doc.getLevel()>2)
+			return getQualitativeModel(doc);
+		else
+			throw new IOException("Invalid SBML Qual file");
+	}
+	
 	public static SBMLQualBundle parseInputStream(InputStream in) throws XMLStreamException {
 		return getQualitativeModel( new SBMLReader().readSBMLFromStream(in));
 	}

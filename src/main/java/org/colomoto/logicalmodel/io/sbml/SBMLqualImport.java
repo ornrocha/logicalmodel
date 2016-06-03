@@ -22,6 +22,7 @@ import org.colomoto.mddlib.operators.MDDBaseOperators;
 import org.sbml.jsbml.ASTNode;
 import org.sbml.jsbml.ASTNode.Type;
 import org.sbml.jsbml.ListOf;
+import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.ext.qual.FunctionTerm;
 import org.sbml.jsbml.ext.qual.Input;
 import org.sbml.jsbml.ext.qual.Output;
@@ -49,6 +50,10 @@ public class SBMLqualImport {
 	
 	public SBMLqualImport(File f) throws IOException, XMLStreamException {
 		this.qualBundle = SBMLqualHelper.loadFile(f);
+	}
+	
+	public SBMLqualImport(SBMLDocument document) throws IOException{
+		this.qualBundle=SBMLqualHelper.loadSBMLDocument(document);
 	}
 	
 	public SBMLQualBundle getQualBundle() {
